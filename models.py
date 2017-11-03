@@ -12,6 +12,10 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+    def clear():
+        db.drop_tables([Rule, SourceLine, OutputLine], safe=True)
+        db.create_tables([Rule, SourceLine, OutputLine])
+
 
 class Rule(BaseModel):
     # The order in which rules will be applied.
@@ -61,18 +65,8 @@ class OutputLine(BaseModel):
     # TODO: A many-to-many reference specifying which rules were applied.
 
 
+
 if __name__ == '__main__':
     db.connect()
     # Drop and recreate the tables.
-    db.drop_tables([Rule, SourceLine, OutputLine], safe=True)
-    db.create_tables([Rule, SourceLine, OutputLine])
-    # Some example data.
-    SourceLine.create(text='banana123')
-    # This rule takes any digits after the word 'banana',
-    # and maps that to a more explicit description of the 'banana number'
-    # in the output.
-    Rule.create(application_order=1,
-                source_column='text',
-                source_pattern=r'banana(?P<banana_number>\d*)',
-                output_column='text',
-                output_pattern='Banana number=$banana_number')
+    BaseModel.clear()

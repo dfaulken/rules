@@ -2,7 +2,9 @@ from models import SourceLine, Rule, OutputLine
 
 
 class Engine:
-    def run(source_lines, rules):
+    def run():
+        source_lines = SourceLine.select().where(SourceLine.processed == False)
+        rules = Rule.select().where(Rule.active == True).order_by(Rule.application_order)
         for source_line in source_lines:
             output_line_attrs = {}
             # Apply each rule in turn, overwriting as we go (if rules apply).
@@ -15,10 +17,9 @@ class Engine:
             # as keyword arguments to `create`.
             OutputLine.create(**output_line_attrs)
             # Mark the source line as processed.
-            source_line.update(processed=True)
+            source_line.processed = True
+            source_line.save()
 
 
 if __name__ == '__main__':
-    source_lines = SourceLine.select().where(SourceLine.processed == False)
-    rules = Rule.select().where(Rule.active == True).order_by(Rule.application_order)
-    Engine.run(source_lines, rules)
+    Engine.run()
