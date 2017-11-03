@@ -11,7 +11,7 @@ class TestRulesEngine(unittest.TestCase):
         SourceLine.create(text='banana123')
         Rule.create(application_order=1,
                     source_column='text',
-                    source_pattern=r'banana(?P<banana_number>\d*)',
+                    source_pattern=r'banana(?P<banana_number>\d+)',
                     output_column='text',
                     output_pattern='Banana number=$banana_number')
         Engine.run()
@@ -37,12 +37,12 @@ class TestRulesEngine(unittest.TestCase):
         SourceLine.create(text='general case FOO with special condition BAR')
         Rule.create(application_order=1,
                     source_column='text',
-                    source_pattern=r'general case (?P<code>\w*)',
+                    source_pattern=r'general case (?P<code>\w+)',
                     output_column='text',
                     output_pattern='$code')
         Rule.create(application_order=2,
                     source_column='text',
-                    source_pattern=r'special condition (?P<code>\w*)',
+                    source_pattern=r'special condition (?P<code>\w+)',
                     output_column='text',
                     output_pattern='$code')
         Engine.run()

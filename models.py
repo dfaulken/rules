@@ -39,7 +39,7 @@ class Rule(BaseModel):
         # Get the data from the source column as specified in the rule.
         source_data = getattr(line, self.source_column)
         # Apply the pattern, and pull the named match groups into a dictionary.
-        match = re.match(self.source_pattern, source_data)
+        match = re.search(self.source_pattern, source_data)
         if not match:
             return attributes
         # Filter out any entries with blank strings (they didn't match)
