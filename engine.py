@@ -10,15 +10,17 @@ class Engine:
             # Apply each rule in turn, overwriting as we go (if rules apply).
             for rule in rules:
                 output_line_attrs = rule.apply(source_line, output_line_attrs)
-            # Add to the attributes the source line
-            # which created the output line.
-            output_line_attrs.update(source_line=source_line)
-            # Apply the dictionary of arguments
-            # as keyword arguments to `create`.
-            OutputLine.create(**output_line_attrs)
-            # Mark the source line as processed.
-            source_line.processed = True
-            source_line.save()
+            # If changes need to be made:
+            if bool(output_line_attrs):
+                # Add to the attributes the source line
+                # which created the output line.
+                output_line_attrs.update(source_line=source_line)
+                # Apply the dictionary of arguments
+                # as keyword arguments to `create`.
+                OutputLine.create(**output_line_attrs)
+                # Mark the source line as processed.
+                source_line.processed = True
+                source_line.save()
 
 
 if __name__ == '__main__':
