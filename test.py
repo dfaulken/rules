@@ -25,13 +25,29 @@ class TestRulesEngine(unittest.TestCase):
         SourceLine.create(text='no match')
         Rule.create(application_order=1,
                     source_column='text',
-                    source_pattern=r'(?P<digits>\d*)',
+                    source_pattern=r'(?P<digits>\d+)',
                     output_column='text',
                     output_pattern='Digits: $digits')
         Engine.run()
         source_line = SourceLine.get()
         self.assertFalse(source_line.processed)
         self.assertEqual(OutputLine.select().count(), 0)
+
+    def test_rule_application_order(self):
+        SourceLine.create(text='general case FOO with special condition BAR')
+        Rule.create(application_order=1,
+                    source_column='text',
+                    source_pattern=r'general case (?P<code>\w*)',
+                    output_column='text',
+                    output_pattern='$code')
+        Rule.create(application_order=2,
+                    source_column='text',
+                    source_pattern=r'special condition (?P<code>\w*)',
+                    output_column='text',
+                    output_pattern='$code')
+        Engine.run()
+        self.assertEqual(OutputLine.select().count(), 1)
+        self.assertEqual(OutputLine.get().text, 'BAR')
 
 
 if __name__ == '__main__':

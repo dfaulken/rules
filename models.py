@@ -39,9 +39,11 @@ class Rule(BaseModel):
         # Get the data from the source column as specified in the rule.
         source_data = getattr(line, self.source_column)
         # Apply the pattern, and pull the named match groups into a dictionary.
-        match_dict = re.match(self.source_pattern, source_data).groupdict()
+        match = re.match(self.source_pattern, source_data)
+        if not match:
+            return attributes
         # Filter out any entries with blank strings (they didn't match)
-        matches = { k: v for k, v in match_dict.items() if v != '' }
+        matches = {k: v for k, v in match.groupdict().items() if v != ''}
         if bool(matches):
             # Create a string template based on the rule's template pattern.
             output_template = Template(self.output_pattern)
