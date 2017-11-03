@@ -3,7 +3,6 @@ from peewee import (Model, IntegerField, BooleanField,
 from playhouse.sqlite_ext import SqliteExtDatabase
 from string import Template
 import datetime
-import os  # for environment variables
 import re  # for regular expressions
 
 db = SqliteExtDatabase('rules.db')
@@ -64,32 +63,16 @@ class OutputLine(BaseModel):
 
 if __name__ == '__main__':
     db.connect()
-    # If the INITIALIZE environment variable is given,
-    # recreate the tables from scratch.
-    if os.environ.get('INITIALIZE'):
-        # Drop and recreate the tables.
-        db.drop_tables([Rule, SourceLine, OutputLine], safe=True)
-        db.create_tables([Rule, SourceLine, OutputLine])
-        # Some example data.
-        SourceLine.create(text='banana123')
-        # This rule takes any digits after the word 'banana',
-        # and maps that to a more explicit description of the 'banana number'
-        # in the output.
-        Rule.create(application_order=1,
-                    source_column='text',
-                    source_pattern=r'banana(?P<banana_number>\d*)',
-                    output_column='text',
-                    output_pattern='Banana number=$banana_number')
-    source_lines = SourceLine.select().where(SourceLine.processed == False)
-    rules = Rule.select().where(Rule.active == True).order_by(Rule.application_order)
-    for source_line in source_lines:
-        output_line_attrs = {}
-        # Apply each rule in turn, overwriting as we go (if rules apply).
-        for rule in rules:
-            output_line_attrs = rule.apply(source_line, output_line_attrs)
-        # Add to the attributes the source line which created the output line.
-        output_line_attrs.update(source_line=source_line)
-        # Apply the dictionary of arguments as keyword arguments to `create`.
-        OutputLine.create(**output_line_attrs)
-        # Mark the source line as processed.
-        source_line.update(processed=True)
+    # Drop and recreate the tables.
+    db.drop_tables([Rule, SourceLine, OutputLine], safe=True)
+    db.create_tables([Rule, SourceLine, OutputLine])
+    # Some example data.
+    SourceLine.create(text='banana123')
+    # This rule takes any digits after the word 'banana',
+    # and maps that to a more explicit description of the 'banana number'
+    # in the output.
+    Rule.create(application_order=1,
+                source_column='text',
+                source_pattern=r'banana(?P<banana_number>\d*)',
+                output_column='text',
+                output_pattern='Banana number=$banana_number')
