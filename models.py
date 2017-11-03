@@ -1,9 +1,10 @@
-from peewee import *
+from peewee import (Model, IntegerField, BooleanField,
+                    CharField, DateTimeField, ForeignKeyField)
 from playhouse.sqlite_ext import SqliteExtDatabase
 from string import Template
 import datetime
-import os
-import re
+import os  # for environment variables
+import re  # for regular expressions
 
 db = SqliteExtDatabase('rules.db')
 
@@ -11,6 +12,7 @@ db = SqliteExtDatabase('rules.db')
 class BaseModel(Model):
     class Meta:
         database = db
+
 
 class Rule(BaseModel):
     application_order = IntegerField(null=False, unique=True)
