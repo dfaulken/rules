@@ -49,6 +49,22 @@ class TestRulesEngine(unittest.TestCase):
         self.assertEqual(OutputLine.select().count(), 1)
         self.assertEqual(OutputLine.get().text, 'BAR')
 
+    def test_composing_rules_with_different_variables(self):
+        SourceLine.create(text='fruit=apple nut=cashew')
+        Rule.create(application_order=1,
+                    source_column='text',
+                    source_pattern='fruit=(?P<fruit>\w+)',
+                    output_column='text',
+                    output_pattern='Fruit $fruit')
+        Rule.create(application_order=2,
+                    source_column='text',
+                    source_pattern='nut=(?P<nut>\w+)',
+                    output_column='text',
+                    output_pattern='Fruit $fruit but also nut $nut')
+        Engine.run()
+        self.assertEqual(OutputLine.get().text,
+                         'Fruit apple but also nut cashew')
+
 
 if __name__ == '__main__':
     unittest.main()
