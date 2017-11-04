@@ -64,6 +64,7 @@ class SourceLine(BaseModel):
     # Whether the source line has been processed,
     # so we don't create multiple output lines per input line.
     processed = BooleanField(default=False)
+    # TODO: A many-to-many reference specifying which rules were applied.
 
 
 class OutputLine(BaseModel):
@@ -71,7 +72,6 @@ class OutputLine(BaseModel):
     text = CharField(null=False)
     # A pointer to the source line from which the output line was created.
     source_line = ForeignKeyField(SourceLine)
-    # TODO: A many-to-many reference specifying which rules were applied.
 
 
 
