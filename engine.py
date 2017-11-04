@@ -10,8 +10,10 @@ class Engine:
             matches = {}
             for rule in rules:
                 matches = rule.find_matches(source_line, matches)
-            output_line_attrs = {}
+            # Find the rules which apply.
+            rules = {rule for rule in rules if rule.applies_to(source_line)}
             # Then, apply them so that the most specific rule takes precedence.
+            output_line_attrs = {}
             for rule in rules:
                 output_line_attrs = rule.apply(matches, output_line_attrs)
             # If changes need to be made:

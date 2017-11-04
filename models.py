@@ -13,8 +13,8 @@ class BaseModel(Model):
         database = db
 
     def clear():
-        db.drop_tables([Rule, SourceLine, OutputLine], safe=True)
-        db.create_tables([Rule, SourceLine, OutputLine])
+        db.drop_tables([Rule, SourceLine, OutputLine, RuleApplication], safe=True)
+        db.create_tables([Rule, SourceLine, OutputLine, RuleApplication])
 
 
 class Rule(BaseModel):
@@ -45,6 +45,11 @@ class Rule(BaseModel):
         attributes[self.output_column] = output_data
         return attributes
 
+    def applies_to(self, source_line):
+        appls = self.rule_applications()
+        appls = appls.where(RuleApplication.source_line == source_line)
+        return appls.exists()
+
     def find_matches(self, source_line, old_matches):
         # Get the data from the source column as specified in the rule.
         source_data = getattr(source_line, self.source_column)
@@ -54,8 +59,14 @@ class Rule(BaseModel):
             return old_matches
         # Filter out any entries with blank strings (they didn't match)
         new_matches = {k: v for k, v in new_match_result.groupdict().items() if v != ''}
-        old_matches.update(new_matches)
+        if bool(new_matches):
+            # Mark that this rule applies to this line.
+            RuleApplication.create(rule=self, source_line=source_line)
+            old_matches.update(new_matches)
         return old_matches
+
+    def rule_applications(self):
+        return RuleApplication.select().where(RuleApplication.rule == self)
 
 
 class SourceLine(BaseModel):
@@ -64,7 +75,6 @@ class SourceLine(BaseModel):
     # Whether the source line has been processed,
     # so we don't create multiple output lines per input line.
     processed = BooleanField(default=False)
-    # TODO: A many-to-many reference specifying which rules were applied.
 
 
 class OutputLine(BaseModel):
@@ -73,6 +83,15 @@ class OutputLine(BaseModel):
     # A pointer to the source line from which the output line was created.
     source_line = ForeignKeyField(SourceLine)
 
+
+class RuleApplication(BaseModel):
+    source_line = ForeignKeyField(SourceLine)
+    rule = ForeignKeyField(Rule)
+
+    class Meta:
+        indexes = (
+                (('source_line', 'rule'), True),  # enforce uniqueness
+                )
 
 
 if __name__ == '__main__':
