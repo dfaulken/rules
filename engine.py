@@ -6,10 +6,12 @@ class Engine:
         source_lines = SourceLine.select().where(SourceLine.processed == False)
         rules = Rule.select().where(Rule.active == True).order_by(Rule.application_order)
         for source_line in source_lines:
-            output_line_attrs = {}
-            # Apply each rule in turn, overwriting as we go (if rules apply).
+            matches = {}
             for rule in rules:
-                output_line_attrs = rule.apply(source_line, output_line_attrs)
+                matches = rule.find_matches(source_line, matches)
+            output_line_attrs = {}
+            for rule in rules:
+                output_line_attrs = rule.apply(matches, output_line_attrs)
             # If changes need to be made:
             if bool(output_line_attrs):
                 # Add to the attributes the source line
