@@ -22,7 +22,7 @@ class TestRulesEngine(unittest.TestCase):
         self.assertEqual(output_line.text, 'Banana number=123')
 
     def test_inapplicable_rules(self):
-        SourceLine.create(text='no match')
+        SourceLine.create(text='no digits here')
         Rule.create(application_order=1,
                     source_column='text',
                     source_pattern=r'(?P<digits>\d+)',
