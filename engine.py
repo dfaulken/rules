@@ -6,10 +6,12 @@ class Engine:
         source_lines = SourceLine.select().where(SourceLine.processed == False)
         rules = Rule.select().where(Rule.active == True).order_by(Rule.application_order)
         for source_line in source_lines:
+            # First, build up the most inclusive list of matches.
             matches = {}
             for rule in rules:
                 matches = rule.find_matches(source_line, matches)
             output_line_attrs = {}
+            # Then, apply them so that the most specific rule takes precedence.
             for rule in rules:
                 output_line_attrs = rule.apply(matches, output_line_attrs)
             # If changes need to be made:
