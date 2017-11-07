@@ -62,6 +62,7 @@ class TestRulesEngine(unittest.TestCase):
                     output_column='text',
                     output_pattern='Fruit $fruit but also nut $nut')
         Engine.run()
+        self.assertEqual(OutputLine.select().count(), 1)
         self.assertEqual(OutputLine.get().text,
                          'Fruit apple but also nut cashew')
 
