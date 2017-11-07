@@ -46,9 +46,7 @@ class Rule(BaseModel):
         return attributes
 
     def applies_to(self, source_line):
-        appls = self.rule_applications()
-        appls = appls.where(RuleApplication.source_line == source_line)
-        return appls.exists()
+        return self.rule_applications().where(RuleApplication.source_line == source_line).exists()
 
     def find_matches(self, source_line, old_matches):
         # Get the data from the source column as specified in the rule.
